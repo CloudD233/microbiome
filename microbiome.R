@@ -14,6 +14,8 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 # Install required Bioconductor packages with the correct version for your R version
 BiocManager::install(.bioc_packages, version = "3.18", force = TRUE)
 
+devtools::install_github("r-lib/conflicted", force = TRUE)
+
 # Install packages from GitHub
 devtools::install_github("adw96/breakaway", force = TRUE)
 
@@ -23,14 +25,15 @@ devtools::install_github(repo = "malucalle/selbal", force = TRUE)
 # Loading the library
 library("selbal")
 
-devtools::install_github("r-lib/conflicted")
+
+
 library(tidyverse); packageVersion("tidyverse")     
 library(phyloseq); packageVersion("phyloseq")                    
 library(DESeq2); packageVersion("DESeq2")                        
 library(microbiome); packageVersion("microbiome")               
 library(vegan); packageVersion("vegan")                          
 library(picante); packageVersion("picante")                       
-library(ALDEx2); packageVersion("ALDEx2")                        
+library(ALDEx2)                        
 library(metagenomeSeq); packageVersion("metagenomeSeq")          
 library(HMP); packageVersion("HMP")                              
 library(dendextend); packageVersion("dendextend")                
@@ -286,7 +289,8 @@ wilcox_results <- wilcox_results %>%
   dplyr::select(OTU, p_value, BH_FDR, everything())
 
 #Printing results
-print.data.frame(wilcox_results)  
+print.data.frame(wilcox_results) 
+
 
 #Generate data.frame
 clr_pcs <- data.frame(
@@ -340,15 +344,3 @@ head(predict(pen_m1, type ="fitted"))
 
 #Agglomerate taxa
 (ps_family <- phyloseq::tax_glom(ps, "Family"))
-
-phyloseq::taxa_names(ps_family) <- phyloseq::tax_table(ps_family)[, "Family"]
-#Run selbal
-cv_sebal <- selbal::selbal.cv(x = data.frame(t(data.frame(phyloseq::otu_table(ps_family)))), 
-                              y = phyloseq::sample_data(ps_family)$Status, 
-                              n.fold = 5, n.iter = 1) 
-
-#plot/print results
-cv_sebal$accuracy.nvar
-
-plot.new()
-grid.draw(cv_sebal$global.plot)
