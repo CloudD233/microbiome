@@ -28,7 +28,6 @@ t2d_merged_data = t2d_data_filtered.merge(taxo_data[['class', 'phylum']], left_i
 control_class_abundance = control_merged_data.select_dtypes(include=[float, int]).groupby(control_merged_data['class']).sum().sum(axis=1).sort_values(ascending=False)
 t2d_class_abundance = t2d_merged_data.select_dtypes(include=[float, int]).groupby(t2d_merged_data['class']).sum().sum(axis=1).sort_values(ascending=False)
 
-
 # Convert to relative abundance
 control_class_relative_abundance = (control_class_abundance / control_class_abundance.sum()) * 100
 t2d_class_relative_abundance = (t2d_class_abundance / t2d_class_abundance.sum()) * 100
@@ -70,4 +69,28 @@ plt.ylabel('Relative Abundance (%)')
 plt.xticks(rotation=0)
 plt.legend(title='Class', bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
+plt.show()
+
+
+
+# PCA # Combine T2D and Control data for PCA
+combined_data = pd.concat([control_data_filtered, t2d_data_filtered], axis=1)
+
+# Apply PCA
+pca = PCA(n_components=2)
+principal_components = pca.fit_transform(combined_data.T)
+
+# Create a DataFrame for the PCA results
+pca_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2'])
+pca_df['Group'] = ['Control'] * len(control_samples) + ['T2D'] * len(t2d_samples)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+for label, color in zip(pca_df['Group'].unique(), ['blue', 'red']):
+    condition = pca_df['Group'] == label
+    plt.scatter(pca_df.loc[condition, 'PC1'], pca_df.loc[condition, 'PC2'], c=color, label=label)
+plt.title('PCA of T2D and Control Samples')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.legend()
 plt.show()
